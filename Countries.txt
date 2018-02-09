@@ -1,0 +1,42 @@
+Congo	Africa3 East_Africa North_Africa South_Africa
+East_Africa	Africa3 Congo Egypt Madagascar North_Africa South_Africa Middle_East
+Egypt	Africa3 East_Africa North_Africa Middle_East Southern_Europe
+Madagascar	Africa3 East_Africa South_Africa
+North_Africa	Africa3 Congo East_Africa Egypt Brazil Southern_Europe Western_Europe
+South_Africa	Africa3 Congo East_Africa Madagascar
+Alaska	North_America5 Alberta Northwest_Territories Kamchatka
+Alberta	North_America5 Alaska Northwest_Territories Ontario Western_US
+Central_America	North_America5 Eastern_US Western_US Argentina
+Eastern_US	North_America5 Central_America Ontario Quebec Western_US
+Greenland	North_America5 Northwest_Territories Ontario Quebec Iceland
+Northwest_Territories	North_America5 Alaska Alberta Greenland Ontario
+Ontario	North_America5 Alberta Eastern_US Greenland Northwest_Territories Quebec Western_US
+Quebec	North_America5 Eastern_US Greenland Ontario
+Western_US	North_America5 Alberta Central_America Eastern_US Ontario
+Venezuela	South_America2 Brazil Peru
+Brazil	South_America2 North_Africa Venezuela Peru Argentina
+Peru	South_America2 Venezuela Brazil Argentina
+Argentina	South_America2 Central_America Brazil Peru
+Afghanistan	Asia7 China India Middle_East Ural Ukraine
+China	Asia7 Afghanistan India Mongolia Siam Siberia Ural
+India	Asia7 Afghanistan China Middle_East Siam
+Irkutsk	Asia7 Kamchatka Mongolia Siberia Yakutsk
+Japan	Asia7 Kamchatka Mongolia
+Kamchatka	Asia7 Alaska Irkutsk Japan Mongolia Yakutsk
+Middle_East	Asia7 East_Africa Egypt Afghanistan India Southern_Europe Ukraine
+Mongolia	Asia7 China Irkutsk Japan Kamchatka Siberia
+Siam	Asia7 China India Indonesia
+Siberia	Asia7 China Irkutsk Mongolia Ural Yakutsk
+Ural	Asia7 Afghanistan China Siberia Ukraine
+Yakutsk	Asia7 Irkutsk Kamchatka Siberia
+Great_Britain	Europe5 Iceland Northern_Europe Scandinavia Western_Europe
+Iceland	Europe5 Greenland Great_Britain Scandinavia
+Northern_Europe	Europe5 Great_Britain Scandinavia Southern_Europe Ukraine Western_Europe
+Scandinavia	Europe5 Great_Britain Iceland Northern_Europe Ukraine
+Southern_Europe	Europe5 Egypt North_Africa Middle_East Northern_Europe Ukraine Western_Europe
+Ukraine	Europe5 Afghanistan Middle_East Ural Northern_Europe Scandinavia Southern_Europe
+Western_Europe	Europe5 North_Africa Great_Britain Northern_Europe Southern_Europe
+Eastern_Australia	Oceania2 New_Guinea Western_Australia
+Indonesia	Oceania2 Siam New_Guinea Western_Australia
+New_Guinea	Oceania2 Eastern_Australia Indonesia Western_Australia
+Western_Australia	Oceania2 Eastern_Australia Indonesia New_Guinea
