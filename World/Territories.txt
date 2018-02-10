@@ -1,0 +1,42 @@
+Congo	Africa3 East_Africa North_Africa South_Africa Canon
+East_Africa	Africa3 Congo Egypt Madagascar North_Africa South_Africa Middle_East Solider
+Egypt	Africa3 East_Africa North_Africa Middle_East Southern_Europe Horse
+Madagascar	Africa3 East_Africa South_Africa Horse
+North_Africa	Africa3 Congo East_Africa Egypt Brazil Southern_Europe Western_Europe Solider
+South_Africa	Africa3 Congo East_Africa Madagascar Canon
+Alaska	North_America5 Alberta Northwest_Territories Kamchatka Canon
+Alberta	North_America5 Alaska Northwest_Territories Ontario Western_US Canon
+Central_America	North_America5 Eastern_US Western_US Argentina Solider
+Eastern_US	North_America5 Central_America Ontario Quebec Western_US Canon
+Greenland	North_America5 Northwest_Territories Ontario Quebec Iceland Horse
+Northwest_Territories	North_America5 Alaska Alberta Greenland Ontario Horse
+Ontario	North_America5 Alberta Eastern_US Greenland Northwest_Territories Quebec Western_US Canon
+Quebec	North_America5 Eastern_US Greenland Ontario Canon
+Western_US	North_America5 Alberta Central_America Eastern_US Ontario Canon
+Venezuela	South_America2 Brazil Peru Horse
+Brazil	South_America2 North_Africa Venezuela Peru Argentina Solider
+Peru	South_America2 Venezuela Brazil Argentina Horse
+Argentina	South_America2 Central_America Brazil Peru Solider
+Afghanistan	Asia7 China India Middle_East Ural Ukraine Solider
+China	Asia7 Afghanistan India Mongolia Siam Siberia Ural Canon
+India	Asia7 Afghanistan China Middle_East Siam Horse
+Irkutsk	Asia7 Kamchatka Mongolia Siberia Yakutsk Canon
+Japan	Asia7 Kamchatka Mongolia Horse
+Kamchatka	Asia7 Alaska Irkutsk Japan Mongolia Yakutsk Canon
+Middle_East	Asia7 East_Africa Egypt Afghanistan India Southern_Europe Ukraine Canon
+Mongolia	Asia7 China Irkutsk Japan Kamchatka Siberia Horse
+Siam	Asia7 China India Indonesia Horse
+Siberia	Asia7 China Irkutsk Mongolia Ural Yakutsk Solider
+Ural	Asia7 Afghanistan China Siberia Ukraine Solider
+Yakutsk	Asia7 Irkutsk Kamchatka Siberia Canon
+Great_Britain	Europe5 Iceland Northern_Europe Scandinavia Western_Europe Solider
+Iceland	Europe5 Greenland Great_Britain Scandinavia Horse
+Northern_Europe	Europe5 Great_Britain Scandinavia Southern_Europe Ukraine Western_Europe Horse
+Scandinavia	Europe5 Great_Britain Iceland Northern_Europe Ukraine Solider
+Southern_Europe	Europe5 Egypt North_Africa Middle_East Northern_Europe Ukraine Western_Europe Solider
+Ukraine	Europe5 Afghanistan Middle_East Ural Northern_Europe Scandinavia Southern_Europe Solider
+Western_Europe	Europe5 North_Africa Great_Britain Northern_Europe Southern_Europe Solider
+Eastern_Australia	Oceania2 New_Guinea Western_Australia Horse
+Indonesia	Oceania2 Siam New_Guinea Western_Australia Solider
+New_Guinea	Oceania2 Eastern_Australia Indonesia Western_Australia Horse
+Western_Australia	Oceania2 Eastern_Australia Indonesia New_Guinea Canon

@@ -5,14 +5,15 @@ Spyder Editor
 This is a temporary script file.
 """
 
-import os
+import GameState
+
 import cv2
 import numpy as np
 import matplotlib as plt
 import random
 from collections import OrderedDict
 
-DEFAULT_BOARD_FILE = 'Risk_game_map.png'
+DEFAULT_BOARD_FILE = 'World/World.png'
 
 global colors
 colors = {}
@@ -45,7 +46,7 @@ class Country:
         self.owner = ''
         self.troops = 0
         
-        image_name = 'Pictures/{}.png'.format(name)
+        image_name = 'World/{}.png'.format(name)
         self.image = cv2.imread(image_name, cv2.IMREAD_GRAYSCALE)
         self.outline = cv2.Canny(self.image,100,200)
         M = cv2.moments(self.image)
@@ -55,7 +56,7 @@ class Country:
     def newOwner(self, owner):
         global players
         if self.owner and self.owner != owner:
-            print('{} captured {} from {}'.format(owner, self.name, self.owner))
+            log('{} captured {} from {}'.format(owner, self.name, self.owner))
             players[self.owner].removeCountry(self.name)
         
         self.owner = owner
@@ -83,11 +84,17 @@ class Player:
         self.placeTroops(new_troops(set(self.mycountries)))
         #show_board()
         self.attack()
+        self.reinforce()
         
     def placeTroops(self, num_troops):
+        global countries
+        log('{} receives {} troops'.format(self.color, num_troops))
         for it in range(num_troops):
             random.shuffle(self.mycountries)
-            countries[self.mycountries[0]].addTroops()
+            for c in [countries[c] for c in self.mycountries]:
+                if not is_isolated(c):
+                    c.addTroops()
+                    break
             
     def attack(self):
         global countries
@@ -103,17 +110,48 @@ class Player:
                 while c.troops > 1 and countries[ec].troops > 0:
                     attack_country(c, countries[ec])
                     
+                #show_board()
                 if c.troops > 1:
                     countries[ec].newOwner(self.color)
                     self.move_troops(c, countries[ec], c.troops-1)
+                else:
+                    log('{} failed to take {} attacking from {}'.format( \
+                          self.color, countries[ec].name, c.name))
                     
-                return
+                    break
+        return
             
     def move_troops(self, from_country, to_country, num_move):
         # Todo check for valid path and ownership
         from_country.removeTroops(num_move)
         to_country.addTroops(num_move)
         
+    def reinforce(self):
+        global countries
+        for c in [countries[c] for c in self.mycountries]:
+            if c.troops < 3:
+                continue
+            
+            for c2 in [countries[c2] for c2 in c.borders]:
+                if not is_isolated(c2) and c2.owner == self.color:
+                    num_move = c.troops-1
+                    log('{} reinforced {} from {} with {} troops'.format( \
+                          self.color, c2.name, c.name, num_move))
+                    self.move_troops(c, c2, num_move)
+                    
+                    return
+def log(str_in):
+    print(str_in)
+                
+def is_isolated(country):
+    
+    global countries
+    for c in [countries[c] for c in country.borders]:
+        if country.owner != c.owner:
+            return False
+        
+    return True
+    
 def roll_die():
     return random.randint(1,6)
 
@@ -169,7 +207,7 @@ def load_countries(country_file):
         
     for l in lines:
         parts = l.strip().split()
-        countries[parts[0]] = Country(parts[0], parts[1], parts[2:])
+        countries[parts[0]] = Country(parts[0], parts[1], parts[2:-1])
         
         continent = continents.get(parts[1], set())
         continent.add(parts[0])
@@ -267,10 +305,12 @@ def main():
     
     global players
     
+    game_state = GameState.GameState('World')
+    
     random.seed(1)
     load_colors()
-    load_countries('Countries.txt')
-    initial_players(3)
+    load_countries('World/Territories.txt')
+    initial_players(6)
     
     show_board()
     
@@ -278,19 +318,24 @@ def main():
     player_list = list(players.keys())
     player_list.reverse()
     
-    while len(players) > 1:
+    round = 0
+    max_rounds = 99
+    while len(player_list) > 1 and round < max_rounds:
         
         ip = 0
-        while ip < len(players):
+        while ip < len(player_list):
             p = players[player_list[ip]]
             if not p.mycountries:
-                del players[player_list[ip]]
+                log('{} is out of the game!!!'.format(player_list[ip]))
+                del player_list[ip]
                 continue
             
             p.takeTurn()
-            show_board()
+            show_board(1000)
+            #show_board()
             ip += 1
             
+        round += 1
         #break
         
     
