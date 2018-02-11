@@ -8,12 +8,10 @@ This is a temporary script file.
 import GameState
 
 import cv2
-import numpy as np
-import matplotlib as plt
+
 import random
 from collections import OrderedDict
 
-DEFAULT_BOARD_FILE = 'World/World.png'
 
 global colors
 colors = {}
@@ -23,51 +21,8 @@ countries = {}
 
 global players
 players = OrderedDict()
-
-global continents
-continents = {}
-
-def load_colors():
     
-    global colors
-    for c in ['blue', 'green', 'red', 'yellow', 'orange', 'purple']:
-        norm = list(plt.colors.to_rgb('xkcd:dark {}'.format(c)))
-        light = list(plt.colors.to_rgb('xkcd:light {}'.format(c)))
-        
-        brgnorm = [int(i * 255) for i in reversed(norm)]
-        brglight = [int(i * 255) for i in reversed(light)]
-        colors[c] = [brgnorm, brglight]
-    
-class Country:
-    def __init__(self, name, continent, borders):
-        self.name = name
-        self.continent = continent
-        self.borders = borders
-        self.owner = ''
-        self.troops = 0
-        
-        image_name = 'World/{}.png'.format(name)
-        self.image = cv2.imread(image_name, cv2.IMREAD_GRAYSCALE)
-        self.outline = cv2.Canny(self.image,100,200)
-        M = cv2.moments(self.image)
-        self.cX = int(M["m10"] / M["m00"])
-        self.cY = int(M["m01"] / M["m00"])
-        
-    def newOwner(self, owner):
-        global players
-        if self.owner and self.owner != owner:
-            log('{} captured {} from {}'.format(owner, self.name, self.owner))
-            players[self.owner].removeCountry(self.name)
-        
-        self.owner = owner
-        players[self.owner].addCountry(self.name)
-        self.troops = 0
-        
-    def addTroops(self, troops=1):
-        self.troops += troops
-        
-    def removeTroops(self, troops=1):
-        self.troops -= troops
+
         
 class Player:
     def __init__(self, color):
@@ -180,38 +135,9 @@ def attack_country(attacking_country, defending_country, attacking_troops=3):
         i += 1
         
         
-def new_troops(my_countries):
+
     
-    global continents
-    
-    # Country Count Troops
-    troops = int(len(my_countries) / 3)
-    if troops < 3:
-        troops = 3
-        
-    # Continent Bonus
-    for n, cont in continents.items():
-        if cont <= my_countries:
-            troops += int(n[-1])
-            
-    return troops
-    
-def load_countries(country_file):
-    
-    global countries
-    global continents
-    
-    lines = []
-    with open(country_file, 'r') as fid:
-        lines = fid.readlines()
-        
-    for l in lines:
-        parts = l.strip().split()
-        countries[parts[0]] = Country(parts[0], parts[1], parts[2:-1])
-        
-        continent = continents.get(parts[1], set())
-        continent.add(parts[0])
-        continents[parts[1]] = continent
+
 
 def initial_players(num_players=2):
     
@@ -240,79 +166,19 @@ def initial_players(num_players=2):
             
             #show_board()
                 
-def show_country_background(base_image, country):
-
-    global colors
-    
-    if not country.owner:
-        return
-        
-    c = country.owner
-    
-    # Fill in the background
-    base_image[np.where(country.image!=[0])] = colors[c][1]
-        
-    # FIll in the edges
-    base_image[np.where(country.outline!=[0])] = colors[c][0]
-            
-def show_country_troops(base_image, country):
-    
-    global colors
-    
-    if not country.owner:
-        return
-        
-    c = country.owner
-    
-    cX = country.cX
-    cY = country.cY
-    
-    # setup text
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    text = str(country.troops)
-    border = 10
-    
-    # get boundary of this text
-    textsize = cv2.getTextSize(text, font, 1, 2)[0]
-    
-    # get coords based on boundary
-    lowerL = int(cX - (textsize[0] + border) / 2)
-    lowerR = int(cY + (textsize[1] + border) / 2)
-    upperL = int(cX + (textsize[0] + border) / 2)
-    upperR = int(cY - (textsize[1] + border) / 2)
-    lowerLT = int(cX - textsize[0] / 2)
-    lowerRT = int(cY + textsize[1] / 2)    
-    cv2.rectangle(base_image, (lowerL, lowerR), (upperL, upperR), colors[c][0], -1)
-    
-    # add text centered on image
-    cv2.putText(base_image, text, (lowerLT, lowerRT), font, 1, colors[c][1], 2)
-    
-def show_board(wait=0):
-    
-    global countries
-    base_image = cv2.imread(DEFAULT_BOARD_FILE)
-    
-    for cn, c in countries.items():
-        show_country_background(base_image, c)
-        
-    for cn, c in countries.items():
-        show_country_troops(base_image, c)
-        
-    cv2.imshow('image', base_image)
-    cv2.waitKey(wait)
-        
-def main():
+def play_game(board, players):
     
     global players
+    global colors
+    global countries
     
     game_state = GameState.GameState('World')
     
     random.seed(1)
-    load_colors()
-    load_countries('World/Territories.txt')
-    initial_players(6)
+    colors = game_state.colors
+    countries = game_state.countries
     
-    show_board()
+    game_state.show_board()
     
     # Whoever picked last, goes first
     player_list = list(players.keys())
@@ -331,15 +197,19 @@ def main():
                 continue
             
             p.takeTurn()
-            show_board(1000)
+            game_state.show_board(1000)
             #show_board()
             ip += 1
             
         round += 1
         #break
         
-    
     cv2.destroyAllWindows()
+
+def main():
+    
+    initial_players(2)
+    play_game('World', 2)
 
 if __name__ == '__main__':
     
