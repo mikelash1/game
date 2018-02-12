@@ -38,15 +38,17 @@ def attack_territory(attacking_territory, defending_territory, attacking_troops=
         i += 1
 
 class Card:
-    def __init__(self, name, value):
+    def __init__(self, name, value, index):
         self.name = name
         self.value = value
+        self.index = index
 
 class Territory:
-    def __init__(self, name, continent, borders, board):
+    def __init__(self, name, index, continent, borders, board):
         self.name = name
         self.continent = continent
         self.borders = borders
+        self.index = index
         self.owner = None
         self.troops = 0
         
@@ -98,16 +100,16 @@ class GameState:
         with open('{}/Territories.txt'.format(self.board), 'r') as fid:
             lines = fid.readlines()
             
-        for l in lines:
+        for i, l in enumerate(lines):
             parts = l.strip().split()
-            new_terr = Territory(parts[0], parts[1], parts[2:-1], self.board)
+            new_terr = Territory(parts[0], i, parts[1], parts[2:-1], self.board)
             self.territories[parts[0]] = new_terr
             
             continent = self.continents.get(parts[1], set())
             continent.add(new_terr)
             self.continents[parts[1]] = continent
             
-            self.cards.append(Card(parts[0], parts[-1]))
+            self.cards.append(Card(parts[0], parts[-1], i))
             
         for n, t in self.territories.items():
             t.borders = [self.territories[t2] for t2 in t.borders]
@@ -206,6 +208,7 @@ class GameState:
     def play_game(self, show = False):
         
         random.shuffle(self.players)
+        random.shuffle(self.cards)
         
         self.random_initialization()
         
@@ -229,7 +232,11 @@ class GameState:
                 del self.players[ip]
                 continue
             
-            p.takeTurn(self.new_troops(p.myterritories))
+            conquered, cards = p.takeTurn(self.new_troops(p.myterritories))
+                
+            #if conquered:
+            #    p.mycards.append(self.cards[0])
+                
             if show:
                 self.show_board(500)
             #show_board()
