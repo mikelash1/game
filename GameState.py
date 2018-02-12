@@ -195,13 +195,14 @@ class GameState:
                 else:
                     random.sample(p.myterritories, 1)[0].addTroops()
     
-    def play_game(self):
+    def play_game(self, show = False):
         
         random.shuffle(self.players)
         
         self.random_initialization()
         
-        self.show_board()
+        if show:
+            self.show_board()
         
         # Whoever picked last, goes first
         self.players.reverse()
@@ -221,10 +222,13 @@ class GameState:
                 continue
             
             p.takeTurn(self.new_troops(p.myterritories))
-            self.show_board(1000)
+            if show:
+                self.show_board(500)
             #show_board()
             ip += 1
-            round += 1
+            #round += 1
             #break
+            
+        logging.info('{} wins!!!'.format(self.players[0].name))
             
         cv2.destroyAllWindows()

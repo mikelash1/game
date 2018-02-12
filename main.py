@@ -28,7 +28,7 @@ def main():
     ch.setFormatter(formatter)
     root.addHandler(ch)
     
-    num_players = 4
+    num_players = 6
     players = []
     for c in ['blue', 'green', 'red', 'yellow', 'orange', 'purple'][:num_players]:
         dark = list(plt.colors.to_rgb('xkcd:dark {}'.format(c)))
