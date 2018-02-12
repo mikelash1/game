@@ -37,6 +37,11 @@ def attack_territory(attacking_territory, defending_territory, attacking_troops=
             
         i += 1
 
+class Card:
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value
+
 class Territory:
     def __init__(self, name, continent, borders, board):
         self.name = name
@@ -83,6 +88,7 @@ class GameState:
         self.players = players
         self.territories = {}
         self.continents = {}
+        self.cards = []
         
         self.load_territories()
         
@@ -100,6 +106,8 @@ class GameState:
             continent = self.continents.get(parts[1], set())
             continent.add(new_terr)
             self.continents[parts[1]] = continent
+            
+            self.cards.append(Card(parts[0], parts[-1]))
             
         for n, t in self.territories.items():
             t.borders = [self.territories[t2] for t2 in t.borders]
