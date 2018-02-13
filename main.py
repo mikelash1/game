@@ -12,18 +12,21 @@ import cv2
 import random
 import matplotlib as plt
 import logging
+import sys
 
 def main():
     
     random.seed(1)
     
     root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+    
     while root.handlers:
         root.handlers.pop()
         
     formatter = logging.Formatter("%(message)s")
     # Setup console logging
-    ch = logging.StreamHandler()
+    ch = logging.StreamHandler(sys.stdout)
     ch.setLevel(logging.DEBUG)
     ch.setFormatter(formatter)
     root.addHandler(ch)
@@ -39,7 +42,7 @@ def main():
         players.append(Player.Player(c, brglight, brgdark))
     
     gs = GameState('World', players)
-    gs.play_game()
+    gs.play_game(500)
 
 if __name__ == '__main__':
     

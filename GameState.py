@@ -38,8 +38,8 @@ def attack_territory(attacking_territory, defending_territory, attacking_troops=
         i += 1
 
 class Card:
-    def __init__(self, name, value, index):
-        self.name = name
+    def __init__(self, territory, value, index):
+        self.territory = territory
         self.value = value
         self.index = index
 
@@ -109,7 +109,10 @@ class GameState:
             continent.add(new_terr)
             self.continents[parts[1]] = continent
             
-            self.cards.append(Card(parts[0], parts[-1], i))
+            self.cards.append(Card(new_terr, parts[-1], i))
+            
+        for i in range(2):
+            self.cards.append(Card(None, 'Wild1', len(self.cards)))
             
         for n, t in self.territories.items():
             t.borders = [self.territories[t2] for t2 in t.borders]
@@ -205,7 +208,7 @@ class GameState:
                 else:
                     random.sample(p.myterritories, 1)[0].addTroops()
     
-    def play_game(self, show = False):
+    def play_game(self, show = 0):
         
         random.shuffle(self.players)
         random.shuffle(self.cards)
@@ -234,11 +237,15 @@ class GameState:
             
             conquered, cards = p.takeTurn(self.new_troops(p.myterritories))
                 
-            #if conquered:
-            #    p.mycards.append(self.cards[0])
+            if conquered:
+                p.mycards.append(self.cards.pop())
+                
+            if cards:
+                self.cards += cards
+                random.shuffle(self.cards)
                 
             if show:
-                self.show_board(500)
+                self.show_board(show)
             #show_board()
             ip += 1
             #round += 1
