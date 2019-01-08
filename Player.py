@@ -6,128 +6,171 @@ Created on Sat Feb 10 21:10:59 2018
 """
 
 import logging
+import matplotlib as plt
+from risk_model import GameState
+import numpy as np
 import random
-import itertools
+from numpy.matlib import rand
 
-from GameState import attack_territory
-
-class Player:
-    def __init__(self, name, brg_light_color = [255, 255, 255], brg_dark_color = [0, 0, 0]):
-        self.name = name
-        self.brg_light_color = brg_light_color
-        self.brg_dark_color = brg_dark_color
-        self.myterritories = []
-        self.mycards = []
-        
-    def add_territory(self, territory):
-        self.myterritories.append(territory)
-        
-    def remove_territory(self, territory):
-        self.myterritories.remove(territory)
-        
-    def takeTurn(self, new_troops):
-        card_troops, cards = self.turn_in_cards()
-        self.placeTroops(new_troops + card_troops)
-        #show_board()
-        conquered, defeated_cards = self.attack()
-        self.reinforce()
-        
-        return conquered, cards + defeated_cards
-        
-    def turn_in_cards(self, bonus = True):
-        
-        new_troops = 0
-        cards = []
-        if len(self.mycards) > 2:
-            for c in itertools.combinations(self.mycards, 3):
-                card_set = set([int(card.value[-1]) for card in c])
-                if len(card_set) != 2:
-                    new_troops = max(card_set)
-                    if len(card_set) == 3:
-                        new_troops = 10
-                       
-                    logging.info(' {} troops from cards'.format(new_troops))
-                    for card in c:
-                        if card.territory and card.territory.owner == self and bonus:
-                            logging.info(' 2 bonus troops from card on {}'.format(card.territory.name))
-                            card.territory.addTroops(2)
-                            bonus = False
-                            
-                        cards.append(card)
-                        self.mycards.remove(card)
-                    
-                    break
-            
-        return new_troops, cards
+class ColorInfo():
+    def __init__(self, xkcd_color):
+        self.light, self.lighthex = self.from_xkcd_color('light ' + xkcd_color)
+        self.normal, self.normalhex = self.from_xkcd_color(xkcd_color)
+        self.dark, self.darkhex = self.from_xkcd_color('dark ' + xkcd_color)
     
-    def placeTroops(self, num_troops):
+    @staticmethod
+    def from_xkcd_color(xkcd_color):
         
-        logging.info('{} receives {} troops to place'.format(self.name, num_troops))
-        for it in range(num_troops):
-            myrandterr = list(self.myterritories)
-            random.shuffle(myrandterr)
-            for t in myrandterr:
-                if not t.is_isolated():
-                    t.addTroops()
-                    break
-            
-    def attack(self):
+        eight_bit = [int(i * 255) for i in list(plt.colors.to_rgb('xkcd:{}'.format(xkcd_color)))]
+        hex = '#%02x%02x%02x' % tuple(eight_bit)
         
-        conquered = False
-        defeated_cards = []
-        myterr = list(self.myterritories)
-        for t in myterr:
-            if t.troops < 3:
-                continue
-            
-            for et in t.borders:
-                if et.owner == self:
-                    continue
-                
-                while t.troops > 1 and et.troops > 0:
-                    attack_territory(t, et)
-                    
-                #show_board()
-                if t.troops > 1:
-                    last_owner = et.owner
-                    et.newOwner(self)
-                    conquered = True
-                    self.move_troops(t, et, t.troops-1)
-                    
-                    if not last_owner.myterritories:
-                        logging.info('{} received {} cards for defeating {}' \
-                             .format(self.name, len(last_owner.mycards), last_owner.name))
-                        
-                        self.mycards += et.owner.mycards
-                        last_owner.mycards = []
-                        while len(self.mycards) > 5:
-                            card_troops, cards = self.turn_in_cards(False)
-                            self.placeTroops(card_troops)
-                            defeated_cards += cards
-                else:
-                    logging.info('{} failed to take {} attacking from {}'.format( \
-                          self.name, et.name, t.name))
-                    
-                    break
-                
-        return conquered, defeated_cards
-            
-    def move_troops(self, from_territory, to_territory, num_move):
-        # Todo check for valid path and ownership
-        from_territory.removeTroops(num_move)
-        to_territory.addTroops(num_move)
+        return eight_bit, hex
         
-    def reinforce(self):
+class Player:
+    def __init__(self, name, color = ColorInfo('grey')):
+        self.name = name
+        self.color = color
+        self.terr_start = len(GameState)
         
-        for t in self.myterritories:
-            if t.troops < 3:
-                continue
-            
-            for t2 in t.borders:
-                if not t2.is_isolated() and t2.owner == self:
-                    num_move = t.troops-1
-                    logging.info('{} reinforced {} from {} with {} troops'.format( \
-                          self.name, t2.name, t.name, num_move))
-                    self.move_troops(t, t2, num_move)
+    def handle_array(self, player_array, input_validation_array, return_array):
+        
+        valid_choice_array = player_array[:len(GameState)]
+        valid_choices = list(np.where(valid_choice_array > 0)[0])
+        random.shuffle(valid_choices)
+        
+        for c in valid_choices:
+            gs = [gs for gs in GameState if gs.value == c][0]
+            if hasattr(self, gs.name):
+                if getattr(self, gs.name)(player_array, input_validation_array, return_array):
+                    return True
+            #else:
+            #    logging.debug(gs.name)
                     
-                    return
+        return False
+    
+        
+class HumanPlayer(Player):
+    
+    #TODO: Take this out
+    def StartTurn(self, player_array, input_validation_array, return_array):
+        logging.debug('{} StartTurn'.format(self.__class__.__name__))
+        return_array[GameState.StartTurn.value] = 1
+        return True
+    
+    
+        
+    # TODO: replace this with drop down in view
+    def TakeOverReinforcement(self, player_array, input_validation_array, return_array):
+        
+        return_array[GameState.TakeOverReinforcement.value] = .99
+        return True
+
+class RandomComputerPlayer(Player):
+        
+    def StartTurn(self, player_array, input_validation_array, return_array):
+        logging.debug('{} StartTurn'.format(self.__class__.__name__))
+        return_array[GameState.StartTurn.value] = 1
+        return True
+    
+    def TurnInCards(self, player_array, input_validation_array, return_array):
+        logging.debug('{} TurnInCards'.format(self.__class__.__name__))
+        return_array[GameState.TurnInCards.value] = 1
+        return True
+    
+    def SelectCard(self, player_array, input_validation_array, return_array):
+        
+        input_valid_terr = input_validation_array[self.terr_start:]
+        return_array_terr = return_array[self.terr_start:]
+        valid_indicies = np.where(input_valid_terr == 1)[0]
+        choice_index = random.choice(list(valid_indicies))
+        #if choice_index > return_array_terr.size - 3:
+        #    return False
+        
+        return_array[GameState.SelectCard.value] = 1
+        return_array_terr[choice_index] = 1
+        return True
+    
+    def StartTroopPlacement(self, player_array, input_validation_array, return_array):
+        logging.debug('{} StartTroopPlacement'.format(self.__class__.__name__))
+        return_array[GameState.StartTroopPlacement.value] = 1
+        return True
+    
+    def PlaceTroops(self, player_array, input_validation_array, return_array):
+        
+        input_valid_terr = input_validation_array[self.terr_start:]
+        return_array_terr = return_array[self.terr_start:]
+        valid_indicies = np.where(input_valid_terr == 1)[0]
+        return_array[GameState.PlaceTroops.value] = 1
+        return_array_terr[random.choice(list(valid_indicies))] = random.random()
+        return True
+    
+    def SelectAttackingTerritory(self, player_array, input_validation_array, return_array):
+        
+        input_valid_terr = input_validation_array[self.terr_start:]
+        return_array_terr = return_array[self.terr_start:]
+        valid_indicies = np.where(input_valid_terr == 1)[0]
+        
+        return_array[GameState.SelectAttackingTerritory.value] = 1
+        return_array_terr[random.choice(list(valid_indicies))] = 1
+        return True
+        
+    def SelectDefendingTerritory(self, player_array, input_validation_array, return_array):
+        
+        input_valid_terr = input_validation_array[self.terr_start:]
+        return_array_terr = return_array[self.terr_start:]
+        valid_indicies = np.where(input_valid_terr == 1)[0]
+        return_array[GameState.SelectDefendingTerritory.value] = 1
+        return_array_terr[random.choice(list(valid_indicies))] = random.random()
+        return True
+    
+    def TakeOverReinforcement(self, player_array, input_validation_array, return_array):
+        
+        return_array[GameState.TakeOverReinforcement.value] = random.random()
+        
+        if not return_array[GameState.TakeOverReinforcement.value]:
+            import sys
+            return_array[GameState.TakeOverReinforcement.value] = sys.float_info.epsilon
+            
+        return True
+    
+    def EndTurn(self, player_array, input_validation_array, return_array):
+        
+        return_array[GameState.EndTurn.value] = 1
+        return True
+
+    def SkipReinforcement(self, player_array, input_validation_array, return_array):
+        
+        return_array[GameState.SkipReinforcement.value] = 1
+        return True
+
+    def SelectReiforceSource(self, player_array, input_validation_array, return_array):
+        
+        input_valid_terr = input_validation_array[self.terr_start:]
+        return_array_terr = return_array[self.terr_start:]
+        valid_indicies = np.where(input_valid_terr == 1)[0]
+        return_array[GameState.SelectReiforceSource.value] = 1
+        
+        return_array_terr[random.choice(list(valid_indicies))] = random.random()
+        return True
+    
+    def SelectReiforceDestination(self, player_array, input_validation_array, return_array):
+        
+        input_valid_terr = input_validation_array[self.terr_start:]
+        return_array_terr = return_array[self.terr_start:]
+        valid_indicies = np.where(input_valid_terr == 1)[0]
+        return_array[GameState.SelectReiforceDestination.value] = 1
+        return_array_terr[random.choice(list(valid_indicies))] = 1
+        return True
+    
+    
+class BasicComputerPlayer(RandomComputerPlayer):
+    
+    def SelectAttackingTerritory(self, player_array, input_validation_array, return_array):
+        
+        input_valid_terr = input_validation_array[self.terr_start:]
+        return_array_terr = return_array[self.terr_start:]
+        valid_indicies = np.where(input_valid_terr == 1)[0]
+        return_array[GameState.SelectAttackingTerritory.value] = 1
+        return_array_terr[random.choice(list(valid_indicies))] = 1
+        return True 
+    
